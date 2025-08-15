@@ -201,7 +201,7 @@ bot.action('check_subscription', async (ctx) => {
 
   if (isSubscribed) {
     if (!previousStatus) {
-      // Пользователь только что подписался
+ 
       ctx.editMessageText(
         '🎉 Отлично! Вы успешно подписались на канал!\n\n' +
         'Теперь вы можете использовать все возможности бота.\n\n' +
@@ -209,7 +209,7 @@ bot.action('check_subscription', async (ctx) => {
         { parse_mode: 'HTML' }
       );
     } else {
-      // Пользователь уже был подписан
+
       ctx.editMessageText(
         '✅ Вы уже подписаны на канал!\n\n' +
         'Используйте /help для получения справки.',
@@ -218,7 +218,6 @@ bot.action('check_subscription', async (ctx) => {
     }
   } else {
     if (previousStatus) {
-      // Пользователь отписался от канала
       ctx.editMessageText(
         '❌ Вы отписались от канала!\n\n' +
         'Для продолжения работы необходимо снова подписаться на канал:\n\n' +
@@ -245,7 +244,7 @@ bot.action('check_subscription', async (ctx) => {
         }
       );
     } else {
-      // Пользователь не подписан
+
       ctx.editMessageText(
         '❌ Условия не соблюдены!\n\n' +
         'Вы не подписаны на канал. Для продолжения работы необходимо подписаться:\n\n' +
@@ -275,7 +274,6 @@ bot.action('check_subscription', async (ctx) => {
   }
 });
 
-// Обработчик команды /help
 bot.help((ctx) => {
   ctx.reply(
     '📚 <b>Справка по боту</b>\n\n' +
@@ -293,7 +291,6 @@ bot.help((ctx) => {
   );
 });
 
-// Обработчик команды /check для ручной проверки
 bot.command('check', async (ctx) => {
   const userId = ctx.from?.id;
   const chatId = ctx.chat?.id;
@@ -338,21 +335,16 @@ bot.command('check', async (ctx) => {
   }
 });
 
-// Обработчик неизвестных команд
 bot.on('text', (ctx) => {
   ctx.reply(
     'Используйте /start для начала работы или /help для справки.'
   );
 });
 
-// Запуск бота
 if (webhookUrl) {
-  // Режим webhook для автоматического отслеживания
   console.log('🚀 Запуск бота в режиме webhook...');
   
   bot.telegram.setWebhook(webhookUrl);
-  
-  // Запускаем HTTP сервер для webhook
   const express = require('express');
   const app = express();
   
@@ -367,20 +359,15 @@ if (webhookUrl) {
     console.log(`🌐 Webhook сервер запущен на порту ${port}`);
     console.log(`📡 Webhook URL: ${webhookUrl}`);
   });
-  
-  // Запускаем мониторинг подписок каждые 5 минут
   setInterval(monitorSubscriptions, 5 * 60 * 1000);
   
 } else {
-  // Режим long polling
   console.log('🚀 Запуск бота в режиме long polling...');
   
   bot.launch()
     .then(() => {
       console.log('🤖 Бот успешно запущен!');
       console.log(`📢 Канал для проверки: ${channelUsername}`);
-      
-      // Запускаем мониторинг подписок каждые 5 минут
       setInterval(monitorSubscriptions, 5 * 60 * 1000);
     })
     .catch((error) => {
@@ -388,6 +375,5 @@ if (webhookUrl) {
     });
 }
 
-// Graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM')); 
