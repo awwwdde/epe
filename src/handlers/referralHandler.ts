@@ -27,14 +27,46 @@ export class ReferralHandler {
         // У пользователя уже есть реферальная ссылка
         const referralCount = this.referralService.getUserReferralCount(userId);
         const botUsername = ctx.botInfo?.username;
+        const referralLink = `https://t.me/${botUsername}?start=${existingCode}`;
         
         const message = `🔗 У вас уже есть реферальная ссылка!\n\n` +
           `📊 Количество приглашенных: ${referralCount}\n\n` +
           `🔗 Ваша ссылка:\n` +
-          `https://t.me/${botUsername}?start=${existingCode}\n\n` +
+          `<code>${referralLink}</code>\n\n` +
           `💡 Поделитесь этой ссылкой с друзьями!`;
         
-        await ctx.reply(message);
+        // Создаем клавиатуру с кнопками для работы со ссылкой
+        const keyboard = {
+          inline_keyboard: [
+            [
+              {
+                text: '🔗 Открыть ссылку',
+                url: referralLink
+              },
+              {
+                text: '📋 Копировать ссылку',
+                callback_data: `copy_link_${existingCode}`
+              }
+            ],
+            [
+              {
+                text: '📤 Поделиться ссылкой',
+                switch_inline_query: `Присоединяйся к боту по моей реферальной ссылке: ${referralLink}`
+              }
+            ],
+            [
+              {
+                text: '🔙 Назад в меню',
+                callback_data: 'back_to_main'
+              }
+            ]
+          ]
+        };
+        
+        await ctx.reply(message, {
+          parse_mode: 'HTML',
+          reply_markup: keyboard
+        });
         return;
       }
 
@@ -50,13 +82,46 @@ export class ReferralHandler {
       this.userService.setReferralLink(userId, referralCode);
 
       const botUsername = ctx.botInfo?.username;
+      const referralLink = `https://t.me/${botUsername}?start=${referralCode}`;
+      
       const message = `🎉 Реферальная ссылка создана!\n\n` +
         `🔗 Ваша ссылка:\n` +
-        `https://t.me/${botUsername}?start=${referralCode}\n\n` +
+        `<code>${referralLink}</code>\n\n` +
         `💡 Поделитесь этой ссылкой с друзьями!\n` +
         `📊 За каждого приглашенного друга вы будете отображаться в топе рефералов.`;
       
-      await ctx.reply(message);
+      // Создаем клавиатуру с кнопками для работы со ссылкой
+      const keyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: '🔗 Открыть ссылку',
+              url: referralLink
+            },
+            {
+              text: '📋 Копировать ссылку',
+              callback_data: `copy_link_${referralCode}`
+            }
+          ],
+          [
+            {
+              text: '📤 Поделиться ссылкой',
+              switch_inline_query: `Присоединяйся к боту по моей реферальной ссылке: ${referralLink}`
+            }
+          ],
+          [
+            {
+              text: '🔙 Назад в меню',
+              callback_data: 'back_to_main'
+            }
+          ]
+        ]
+      };
+      
+      await ctx.reply(message, {
+        parse_mode: 'HTML',
+        reply_markup: keyboard
+      });
 
     } catch (error) {
       console.error('Ошибка в ReferralHandler:', error);

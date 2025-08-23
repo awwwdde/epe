@@ -104,6 +104,11 @@ bot.action('show_stats', async (ctx) => {
   await callbackHandlers.showStats(ctx);
 });
 
+// Обработчик для копирования ссылки
+bot.action(/^copy_link_/, async (ctx) => {
+  await callbackHandlers.copyLink(ctx);
+});
+
 // Обработчик неизвестных команд
 bot.on(message('text'), async (ctx) => {
   await ctx.reply(messages.unknownCommand);

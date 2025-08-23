@@ -80,15 +80,45 @@ export class CallbackHandlers {
       // У пользователя уже есть реферальная ссылка
       const referralCount = this.referralService.getUserReferralCount(userId);
       const botUsername = ctx.botInfo?.username;
+      const referralLink = `https://t.me/${botUsername}?start=${existingCode}`;
       
       const message = `🔗 У вас уже есть реферальная ссылка!\n\n` +
         `📊 Количество приглашенных: ${referralCount}\n\n` +
         `🔗 Ваша ссылка:\n` +
-        `https://t.me/${botUsername}?start=${existingCode}\n\n` +
+        `<code>${referralLink}</code>\n\n` +
         `💡 Поделитесь этой ссылкой с друзьями!`;
       
+      // Создаем клавиатуру с кнопками для работы со ссылкой
+      const keyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: '🔗 Открыть ссылку',
+              url: referralLink
+            },
+            {
+              text: '📋 Копировать ссылку',
+              callback_data: `copy_link_${existingCode}`
+            }
+          ],
+          [
+            {
+              text: '📤 Поделиться ссылкой',
+              switch_inline_query: `Присоединяйся к боту по моей реферальной ссылке: ${referralLink}`
+            }
+          ],
+          [
+            {
+              text: '🔙 Назад в меню',
+              callback_data: 'referral_menu'
+            }
+          ]
+        ]
+      };
+      
       await ctx.editMessageText(message, {
-        reply_markup: keyboards.referralMenu
+        parse_mode: 'HTML',
+        reply_markup: keyboard
       });
       return;
     }
@@ -107,15 +137,67 @@ export class CallbackHandlers {
     this.userService.setReferralLink(userId, referralCode);
 
     const botUsername = ctx.botInfo?.username;
+    const referralLink = `https://t.me/${botUsername}?start=${referralCode}`;
+    
     const message = `🎉 Реферальная ссылка создана!\n\n` +
       `🔗 Ваша ссылка:\n` +
-      `https://t.me/${botUsername}?start=${referralCode}\n\n` +
+      `<code>${referralLink}</code>\n\n` +
       `💡 Поделитесь этой ссылкой с друзьями!\n` +
       `📊 За каждого приглашенного друга вы будете отображаться в топе рефералов.`;
     
+    // Создаем клавиатуру с кнопками для работы со ссылкой
+    const keyboard = {
+      inline_keyboard: [
+        [
+          {
+            text: '🔗 Открыть ссылку',
+            url: referralLink
+          },
+          {
+            text: '📋 Копировать ссылку',
+            callback_data: `copy_link_${referralCode}`
+          }
+        ],
+        [
+          {
+            text: '📤 Поделиться ссылкой',
+            switch_inline_query: `Присоединяйся к боту по моей реферальной ссылке: ${referralLink}`
+          }
+        ],
+        [
+          {
+            text: '🔙 Назад в меню',
+            callback_data: 'referral_menu'
+          }
+        ]
+      ]
+    };
+    
     await ctx.editMessageText(message, {
-      reply_markup: keyboards.referralMenu
+      parse_mode: 'HTML',
+      reply_markup: keyboard
     });
+  }
+
+  // Копировать ссылку
+  async copyLink(ctx: Context): Promise<void> {
+    const callbackData = ctx.callbackQuery?.data;
+    if (!callbackData) {
+      await ctx.answerCbQuery('❌ Ошибка при копировании ссылки');
+      return;
+    }
+
+    const code = callbackData.replace('copy_link_', '');
+    const botUsername = ctx.botInfo?.username;
+    const referralLink = `https://t.me/${botUsername}?start=${code}`;
+
+    // Отправляем ссылку как отдельное сообщение для удобного копирования
+    await ctx.reply(`📋 Ваша реферальная ссылка:\n\n<code>${referralLink}</code>\n\n💡 Скопируйте эту ссылку и поделитесь с друзьями!`, {
+      parse_mode: 'HTML'
+    });
+
+    // Отвечаем на callback
+    await ctx.answerCbQuery('✅ Ссылка скопирована!');
   }
 
   // Показать личную реферальную статистику
