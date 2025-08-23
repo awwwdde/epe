@@ -4,7 +4,7 @@ import { spawn, ChildProcess } from 'child_process';
 import fs from 'fs';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Bot process management
 let botProcess: ChildProcess | null = null;
@@ -256,24 +256,27 @@ process.on('SIGINT', () => {
 
 // Start the development server
 app.listen(PORT, () => {
-  addLog(`🌐 Development server started at http://localhost:${PORT}`);
+  addLog(`🌐 Server started at http://localhost:${PORT}`);
   addLog('💡 Use the web interface to control your EPE Bot');
   
-  // Try to open the browser automatically
-  const open = require('child_process').exec;
-  const url = `http://localhost:${PORT}`;
-  
-  // Cross-platform browser opening
-  const start = process.platform === 'darwin' ? 'open' : 
-                process.platform === 'win32' ? 'start' : 'xdg-open';
-  
-  open(`${start} ${url}`, (error: any) => {
-    if (error) {
-      addLog(`🌐 Please open ${url} in your browser`);
-    } else {
-      addLog(`🌐 Opening ${url} in browser...`);
-    }
-  });
+  // Only try to open browser in development mode
+  if (process.env.NODE_ENV !== 'production') {
+    // Try to open the browser automatically
+    const open = require('child_process').exec;
+    const url = `http://localhost:${PORT}`;
+    
+    // Cross-platform browser opening
+    const start = process.platform === 'darwin' ? 'open' : 
+                  process.platform === 'win32' ? 'start' : 'xdg-open';
+    
+    open(`${start} ${url}`, (error: any) => {
+      if (error) {
+        addLog(`🌐 Please open ${url} in your browser`);
+      } else {
+        addLog(`🌐 Opening ${url} in browser...`);
+      }
+    });
+  }
 });
 
 export default app;

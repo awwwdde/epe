@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPE BOT - Development Interface</title>
-    <meta name="description" content="EPE Bot Development Interface - Control and monitor your Telegram bot with referral system">
+    <title>EPE BOT - Control Panel</title>
+    <meta name="description" content="EPE Bot Control Panel - Manage your Telegram bot with referral system">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
@@ -428,7 +428,7 @@
         <section class="hero">
             <div class="container">
                 <h1><i class="fas fa-robot"></i> EPE BOT</h1>
-                <p>Development Interface - Control and monitor your Telegram bot with referral system</p>
+                <p>Control Panel - Manage and monitor your Telegram bot with referral system</p>
                 
                 <div class="bot-status" id="botStatus">
                     <div class="status-indicator"></div>
@@ -548,11 +548,6 @@
                 <p style="text-align: center; margin-bottom: 2rem;">Manage your EPE Bot directly from this interface</p>
                 
                 <div class="control-panel">
-                    <div id="modeIndicator" style="background: #e3f2fd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: none;">
-                        <h4 style="color: #1976D2; margin-bottom: 0.5rem;">🌐 Netlify Demo Mode</h4>
-                        <p style="margin: 0; color: #666;">This is a demonstration of the bot control interface. For full bot functionality, run <code>npm run dev</code> locally.</p>
-                    </div>
-                    
                     <div class="status-display">
                         <h3>Bot Status</h3>
                         <p>Current Status: <span class="status-badge" id="statusBadge">stopped</span></p>
@@ -641,29 +636,14 @@
                 this.status = 'stopped';
                 this.logs = [];
                 this.updateInterval = null;
-                this.isNetlify = this.detectNetlifyMode();
-                this.apiBase = this.isNetlify ? '/.netlify/functions' : '/api';
+                this.apiBase = '/api';
                 this.init();
-            }
-
-            detectNetlifyMode() {
-                // Check if we're running on Netlify by looking at the hostname or presence of Netlify-specific elements
-                const hostname = window.location.hostname;
-                return hostname.includes('netlify.app') || hostname.includes('netlify.com') || 
-                       window.location.pathname.includes('/.netlify/');
             }
 
             init() {
                 this.bindEvents();
                 this.startStatusUpdates();
                 this.updateBotStatus();
-                
-                // Show Netlify mode indicator if applicable
-                if (this.isNetlify) {
-                    document.getElementById('modeIndicator').style.display = 'block';
-                    this.addLog('🌐 Running in Netlify mode - Limited bot control available');
-                    this.addLog('💡 For full bot control, use local development server: npm run dev');
-                }
             }
 
             bindEvents() {
@@ -675,7 +655,7 @@
 
             async startBot() {
                 try {
-                    const response = await fetch(`${this.apiBase}/start-bot`, { method: 'POST' });
+                    const response = await fetch(`${this.apiBase}/start`, { method: 'POST' });
                     const result = await response.json();
                     
                     if (result.success) {
@@ -690,7 +670,7 @@
 
             async stopBot() {
                 try {
-                    const response = await fetch(`${this.apiBase}/stop-bot`, { method: 'POST' });
+                    const response = await fetch(`${this.apiBase}/stop`, { method: 'POST' });
                     const result = await response.json();
                     
                     if (result.success) {
@@ -705,7 +685,7 @@
 
             async restartBot() {
                 try {
-                    const response = await fetch(`${this.apiBase}/restart-bot`, { method: 'POST' });
+                    const response = await fetch(`${this.apiBase}/restart`, { method: 'POST' });
                     const result = await response.json();
                     
                     if (result.success) {
@@ -720,7 +700,7 @@
 
             async clearLogs() {
                 try {
-                    const response = await fetch(`${this.apiBase}/clear-logs`, { method: 'DELETE' });
+                    const response = await fetch(`${this.apiBase}/logs`, { method: 'DELETE' });
                     const result = await response.json();
                     
                     if (result.success) {
@@ -735,7 +715,7 @@
 
             async updateBotStatus() {
                 try {
-                    const response = await fetch(`${this.apiBase}/bot-status`);
+                    const response = await fetch(`${this.apiBase}/status`);
                     const data = await response.json();
                     
                     this.status = data.status || 'stopped';
@@ -747,12 +727,10 @@
                     
                 } catch (error) {
                     console.error('Failed to fetch bot status:', error);
-                    if (this.isNetlify) {
-                        // In Netlify mode, show demo status
-                        this.status = 'demo';
-                        this.updateStatusDisplay('demo', 0);
-                        this.updateButtons();
-                    }
+                    // Set fallback status
+                    this.status = 'stopped';
+                    this.updateStatusDisplay('stopped', 0);
+                    this.updateButtons();
                 }
             }
 
