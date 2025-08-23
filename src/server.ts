@@ -4,7 +4,14 @@ import { spawn, ChildProcess } from 'child_process';
 import fs from 'fs';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
+
+// Add startup logging
+console.log('🚀 Starting EPE Bot server...');
+console.log(`🌐 Port: ${PORT}`);
+console.log(`💻 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`📁 Working directory: ${process.cwd()}`);
+console.log(`🔧 Node version: ${process.version}`);
 
 // Bot process management
 let botProcess: ChildProcess | null = null;
@@ -18,6 +25,16 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Serve the main HTML page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Health check endpoint for Railway
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    botStatus: botStatus
+  });
 });
 
 // API Routes
@@ -255,9 +272,10 @@ process.on('SIGINT', () => {
 });
 
 // Start the development server
-app.listen(PORT, () => {
-  addLog(`🌐 Server started at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  addLog(`🌐 Server started at http://0.0.0.0:${PORT}`);
   addLog('💡 Use the web interface to control your EPE Bot');
+  addLog(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`);
   
   // Only try to open browser in development mode
   if (process.env.NODE_ENV !== 'production') {
@@ -277,6 +295,9 @@ app.listen(PORT, () => {
       }
     });
   }
+}).on('error', (err) => {
+  console.error('❌ Server failed to start:', err);
+  process.exit(1);
 });
 
 export default app;
