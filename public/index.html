@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPE BOT - Development Interface</title>
+    <meta name="description" content="EPE Bot Development Interface - Control and monitor your Telegram bot with referral system">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .bot-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            margin-bottom: 2rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #2196F3;
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .cta-button:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        /* Features Section */
+        .features {
+            background: white;
+            padding: 4rem 0;
+        }
+
+        .features h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #2196F3;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        /* Commands Section */
+        .commands {
+            background: #f8f9fa;
+            padding: 4rem 0;
+        }
+
+        .commands h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .command-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .command-item code {
+            background: #e3f2fd;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #1976D2;
+        }
+
+        /* Architecture Section */
+        .architecture {
+            background: white;
+            padding: 4rem 0;
+        }
+
+        .architecture h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .arch-diagram {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .service-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .service-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        /* Bot Control Section */
+        .bot-control {
+            background: white;
+            padding: 4rem 0;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .control-btn.start {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .control-btn.stop {
+            background: #f44336;
+            color: white;
+        }
+
+        .control-btn.restart {
+            background: #FF9800;
+            color: white;
+        }
+
+        .control-btn.clear {
+            background: #9E9E9E;
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-display {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #2196F3;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-badge.running {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-badge.stopped {
+            background: #f44336;
+            color: white;
+        }
+
+        .status-badge.starting {
+            background: #FF9800;
+            color: white;
+        }
+
+        .status-badge.stopping {
+            background: #9E9E9E;
+            color: white;
+        }
+
+        .logs-container {
+            background: #263238;
+            color: #4CAF50;
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+            word-wrap: break-word;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .features-grid,
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">
+                <i class="fab fa-telegram-plane"></i> EPE BOT
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#commands">Commands</a></li>
+                <li><a href="#control">Control</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1><i class="fas fa-robot"></i> EPE BOT</h1>
+                <p>Development Interface - Control and monitor your Telegram bot with referral system</p>
+                
+                <div class="bot-status" id="botStatus">
+                    <div class="status-indicator"></div>
+                    <span>Bot Status: <span id="statusText">Checking...</span></span>
+                </div>
+                
+                <br>
+                <a href="#control" class="cta-button" id="startBot">
+                    <i class="fas fa-cogs"></i> Control Bot
+                </a>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="container">
+                <h2>Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>Subscription Verification</h3>
+                        <p>Automatically verify user subscription to your Telegram channel with real-time status checking</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <h3>Referral System</h3>
+                        <p>Generate unique referral links and track user acquisitions with comprehensive analytics</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3>Leaderboard</h3>
+                        <p>Competitive leaderboard system to gamify user engagement and referral activities</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3>Data Persistence</h3>
+                        <p>Automatic JSON-based data storage with backup system for data integrity</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h3>Auto Monitoring</h3>
+                        <p>Periodic subscription status monitoring with automated user notifications</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Reliable Architecture</h3>
+                        <p>Built with TypeScript and modern frameworks for robust performance</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Commands Section -->
+        <section class="commands" id="commands">
+            <div class="container">
+                <h2>Bot Commands</h2>
+                <div class="commands-grid">
+                    <div class="command-item">
+                        <h4><code>/start</code></h4>
+                        <p>Initialize bot interaction and user registration</p>
+                    </div>
+                    
+                    <div class="command-item">
+                        <h4><code>/help</code></h4>
+                        <p>Display comprehensive help and available commands</p>
+                    </div>
+                    
+                    <div class="command-item">
+                        <h4><code>/subscribe</code></h4>
+                        <p>Check and verify channel subscription status</p>
+                    </div>
+                    
+                    <div class="command-item">
+                        <h4><code>/check</code></h4>
+                        <p>Manually verify current subscription status</p>
+                    </div>
+                    
+                    <div class="command-item">
+                        <h4><code>/referral</code></h4>
+                        <p>Access referral system menu and generate links</p>
+                    </div>
+                    
+                    <div class="command-item">
+                        <h4><code>/leaderboard</code></h4>
+                        <p>View top referrers and ranking statistics</p>
+                    </div>
+                    
+                    <div class="command-item">
+                        <h4><code>/mystats</code></h4>
+                        <p>Display personal referral statistics and metrics</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bot Control Section -->
+        <section class="bot-control" id="control">
+            <div class="container">
+                <h2>Bot Control Panel</h2>
+                <p style="text-align: center; margin-bottom: 2rem;">Manage your EPE Bot directly from this interface</p>
+                
+                <div class="control-panel">
+                    <div class="status-display">
+                        <h3>Bot Status</h3>
+                        <p>Current Status: <span class="status-badge" id="statusBadge">stopped</span></p>
+                        <p>Uptime: <span id="uptimeDisplay">0s</span></p>
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button class="control-btn start" id="startBtn">
+                            <i class="fas fa-play"></i> Start Bot
+                        </button>
+                        <button class="control-btn stop" id="stopBtn" disabled>
+                            <i class="fas fa-stop"></i> Stop Bot
+                        </button>
+                        <button class="control-btn restart" id="restartBtn" disabled>
+                            <i class="fas fa-redo"></i> Restart Bot
+                        </button>
+                        <button class="control-btn clear" id="clearLogsBtn">
+                            <i class="fas fa-broom"></i> Clear Logs
+                        </button>
+                    </div>
+                    
+                    <div class="logs-header">
+                        <h3>Bot Logs</h3>
+                        <small>Real-time bot activity</small>
+                    </div>
+                    <div class="logs-container" id="logsContainer">
+                        <div class="log-entry">Waiting for bot activity...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section class="architecture" id="architecture">
+            <div class="container">
+                <h2>System Architecture</h2>
+                <p style="text-align: center; margin-bottom: 2rem;">Built with modern TypeScript and Node.js, following a clean, modular architecture</p>
+                
+                <div class="arch-diagram">
+                    <h3>Core Services</h3>
+                    <div class="service-list">
+                        <div class="service-item">
+                            <strong>UserService</strong><br>
+                            <small>User lifecycle management</small>
+                        </div>
+                        <div class="service-item">
+                            <strong>ReferralService</strong><br>
+                            <small>Referral tracking & generation</small>
+                        </div>
+                        <div class="service-item">
+                            <strong>SubscriptionService</strong><br>
+                            <small>Channel subscription verification</small>
+                        </div>
+                        <div class="service-item">
+                            <strong>DataStorageService</strong><br>
+                            <small>JSON persistence & backups</small>
+                        </div>
+                        <div class="service-item">
+                            <strong>MonitoringService</strong><br>
+                            <small>Periodic status monitoring</small>
+                        </div>
+                        <div class="service-item">
+                            <strong>MessageService</strong><br>
+                            <small>User communication handling</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <p><strong>Technology Stack:</strong> TypeScript • Node.js • Telegraf • JSON Storage</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 EPE BOT. Built with <i class="fas fa-heart" style="color: #e74c3c;"></i> using TypeScript and Telegraf</p>
+        </div>
+    </footer>
+
+    <script>
+        // Bot Control System
+        class BotController {
+            constructor() {
+                this.status = 'stopped';
+                this.logs = [];
+                this.updateInterval = null;
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.startStatusUpdates();
+                this.updateBotStatus();
+            }
+
+            bindEvents() {
+                document.getElementById('startBtn').addEventListener('click', () => this.startBot());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stopBot());
+                document.getElementById('restartBtn').addEventListener('click', () => this.restartBot());
+                document.getElementById('clearLogsBtn').addEventListener('click', () => this.clearLogs());
+            }
+
+            async startBot() {
+                try {
+                    const response = await fetch('/api/start', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.addLog('🚀 Bot start command sent');
+                    } else {
+                        this.addLog(`❌ Failed to start bot: ${result.message}`);
+                    }
+                } catch (error) {
+                    this.addLog(`💥 Error starting bot: ${error.message}`);
+                }
+            }
+
+            async stopBot() {
+                try {
+                    const response = await fetch('/api/stop', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.addLog('🛑 Bot stop command sent');
+                    } else {
+                        this.addLog(`❌ Failed to stop bot: ${result.message}`);
+                    }
+                } catch (error) {
+                    this.addLog(`💥 Error stopping bot: ${error.message}`);
+                }
+            }
+
+            async restartBot() {
+                try {
+                    const response = await fetch('/api/restart', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.addLog('🔄 Bot restart command sent');
+                    } else {
+                        this.addLog(`❌ Failed to restart bot: ${result.message}`);
+                    }
+                } catch (error) {
+                    this.addLog(`💥 Error restarting bot: ${error.message}`);
+                }
+            }
+
+            async clearLogs() {
+                try {
+                    const response = await fetch('/api/logs', { method: 'DELETE' });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.logs = [];
+                        this.updateLogsDisplay();
+                    }
+                } catch (error) {
+                    this.addLog(`💥 Error clearing logs: ${error.message}`);
+                }
+            }
+
+            async updateBotStatus() {
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+                    
+                    this.status = data.status;
+                    this.logs = data.logs || [];
+                    
+                    this.updateStatusDisplay(data.status, data.uptime);
+                    this.updateLogsDisplay();
+                    this.updateButtons();
+                    
+                } catch (error) {
+                    console.error('Failed to fetch bot status:', error);
+                }
+            }
+
+            updateStatusDisplay(status, uptime) {
+                const statusBadge = document.getElementById('statusBadge');
+                const uptimeDisplay = document.getElementById('uptimeDisplay');
+                const heroStatus = document.getElementById('statusText');
+                
+                // Update status badge
+                statusBadge.textContent = status;
+                statusBadge.className = `status-badge ${status}`;
+                
+                // Update uptime
+                if (uptime && status === 'running') {
+                    const uptimeStr = this.formatUptime(uptime);
+                    uptimeDisplay.textContent = uptimeStr;
+                } else {
+                    uptimeDisplay.textContent = '0s';
+                }
+                
+                // Update hero section status
+                if (heroStatus) {
+                    const statusMap = {
+                        'running': 'Online & Active',
+                        'starting': 'Starting...',
+                        'stopping': 'Shutting Down...',
+                        'stopped': 'Offline'
+                    };
+                    heroStatus.textContent = statusMap[status] || status;
+                }
+            }
+
+            updateButtons() {
+                const startBtn = document.getElementById('startBtn');
+                const stopBtn = document.getElementById('stopBtn');
+                const restartBtn = document.getElementById('restartBtn');
+                
+                switch (this.status) {
+                    case 'stopped':
+                        startBtn.disabled = false;
+                        stopBtn.disabled = true;
+                        restartBtn.disabled = true;
+                        break;
+                    case 'running':
+                        startBtn.disabled = true;
+                        stopBtn.disabled = false;
+                        restartBtn.disabled = false;
+                        break;
+                    case 'starting':
+                    case 'stopping':
+                        startBtn.disabled = true;
+                        stopBtn.disabled = true;
+                        restartBtn.disabled = true;
+                        break;
+                }
+            }
+
+            updateLogsDisplay() {
+                const logsContainer = document.getElementById('logsContainer');
+                
+                if (this.logs.length === 0) {
+                    logsContainer.innerHTML = '<div class="log-entry">No logs available</div>';
+                    return;
+                }
+                
+                const logsHtml = this.logs.map(log => 
+                    `<div class="log-entry">${this.escapeHtml(log)}</div>`
+                ).join('');
+                
+                logsContainer.innerHTML = logsHtml;
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+
+            addLog(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                this.logs.push(logEntry);
+                this.updateLogsDisplay();
+            }
+
+            formatUptime(seconds) {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = Math.floor(seconds % 60);
+                
+                if (hours > 0) {
+                    return `${hours}h ${minutes}m ${secs}s`;
+                } else if (minutes > 0) {
+                    return `${minutes}m ${secs}s`;
+                } else {
+                    return `${secs}s`;
+                }
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            startStatusUpdates() {
+                // Update status every 2 seconds
+                this.updateInterval = setInterval(() => {
+                    this.updateBotStatus();
+                }, 2000);
+            }
+
+            destroy() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                }
+            }
+        }
+
+        // Legacy functions for compatibility
+        function updateBotStatus() {
+            // This is now handled by BotController
+        }
+
+        // Initialize bot controller
+        let botController;
+
+        // Start bot interaction (updated)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize bot controller
+            botController = new BotController();
+            
+            // Update start bot button behavior
+            const startBotBtn = document.getElementById('startBot');
+            if (startBotBtn) {
+                startBotBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Scroll to control panel
+                    const controlSection = document.getElementById('control');
+                    if (controlSection) {
+                        controlSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            }
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add animation to feature cards
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.feature-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s, transform 0.6s';
+                observer.observe(card);
+            });
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (botController) {
+                botController.destroy();
+            }
+        });
+    </script>
+</body>
+</html>
