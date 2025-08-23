@@ -341,6 +341,11 @@
             color: white;
         }
 
+        .status-badge.demo {
+            background: #9C27B0;
+            color: white;
+        }
+
         .logs-container {
             background: #263238;
             color: #4CAF50;
@@ -543,6 +548,11 @@
                 <p style="text-align: center; margin-bottom: 2rem;">Manage your EPE Bot directly from this interface</p>
                 
                 <div class="control-panel">
+                    <div id="modeIndicator" style="background: #e3f2fd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: none;">
+                        <h4 style="color: #1976D2; margin-bottom: 0.5rem;">🌐 Netlify Demo Mode</h4>
+                        <p style="margin: 0; color: #666;">This is a demonstration of the bot control interface. For full bot functionality, run <code>npm run dev</code> locally.</p>
+                    </div>
+                    
                     <div class="status-display">
                         <h3>Bot Status</h3>
                         <p>Current Status: <span class="status-badge" id="statusBadge">stopped</span></p>
@@ -631,13 +641,29 @@
                 this.status = 'stopped';
                 this.logs = [];
                 this.updateInterval = null;
+                this.isNetlify = this.detectNetlifyMode();
+                this.apiBase = this.isNetlify ? '/.netlify/functions' : '/api';
                 this.init();
+            }
+
+            detectNetlifyMode() {
+                // Check if we're running on Netlify by looking at the hostname or presence of Netlify-specific elements
+                const hostname = window.location.hostname;
+                return hostname.includes('netlify.app') || hostname.includes('netlify.com') || 
+                       window.location.pathname.includes('/.netlify/');
             }
 
             init() {
                 this.bindEvents();
                 this.startStatusUpdates();
                 this.updateBotStatus();
+                
+                // Show Netlify mode indicator if applicable
+                if (this.isNetlify) {
+                    document.getElementById('modeIndicator').style.display = 'block';
+                    this.addLog('🌐 Running in Netlify mode - Limited bot control available');
+                    this.addLog('💡 For full bot control, use local development server: npm run dev');
+                }
             }
 
             bindEvents() {
@@ -649,13 +675,13 @@
 
             async startBot() {
                 try {
-                    const response = await fetch('/api/start', { method: 'POST' });
+                    const response = await fetch(`${this.apiBase}/start-bot`, { method: 'POST' });
                     const result = await response.json();
                     
                     if (result.success) {
                         this.addLog('🚀 Bot start command sent');
                     } else {
-                        this.addLog(`❌ Failed to start bot: ${result.message}`);
+                        this.addLog(`❌ ${result.message}`);
                     }
                 } catch (error) {
                     this.addLog(`💥 Error starting bot: ${error.message}`);
@@ -664,13 +690,13 @@
 
             async stopBot() {
                 try {
-                    const response = await fetch('/api/stop', { method: 'POST' });
+                    const response = await fetch(`${this.apiBase}/stop-bot`, { method: 'POST' });
                     const result = await response.json();
                     
                     if (result.success) {
                         this.addLog('🛑 Bot stop command sent');
                     } else {
-                        this.addLog(`❌ Failed to stop bot: ${result.message}`);
+                        this.addLog(`❌ ${result.message}`);
                     }
                 } catch (error) {
                     this.addLog(`💥 Error stopping bot: ${error.message}`);
@@ -679,13 +705,13 @@
 
             async restartBot() {
                 try {
-                    const response = await fetch('/api/restart', { method: 'POST' });
+                    const response = await fetch(`${this.apiBase}/restart-bot`, { method: 'POST' });
                     const result = await response.json();
                     
                     if (result.success) {
                         this.addLog('🔄 Bot restart command sent');
                     } else {
-                        this.addLog(`❌ Failed to restart bot: ${result.message}`);
+                        this.addLog(`❌ ${result.message}`);
                     }
                 } catch (error) {
                     this.addLog(`💥 Error restarting bot: ${error.message}`);
@@ -694,12 +720,13 @@
 
             async clearLogs() {
                 try {
-                    const response = await fetch('/api/logs', { method: 'DELETE' });
+                    const response = await fetch(`${this.apiBase}/clear-logs`, { method: 'DELETE' });
                     const result = await response.json();
                     
                     if (result.success) {
                         this.logs = [];
                         this.updateLogsDisplay();
+                        this.addLog('🧽 Logs cleared');
                     }
                 } catch (error) {
                     this.addLog(`💥 Error clearing logs: ${error.message}`);
@@ -708,10 +735,10 @@
 
             async updateBotStatus() {
                 try {
-                    const response = await fetch('/api/status');
+                    const response = await fetch(`${this.apiBase}/bot-status`);
                     const data = await response.json();
                     
-                    this.status = data.status;
+                    this.status = data.status || 'stopped';
                     this.logs = data.logs || [];
                     
                     this.updateStatusDisplay(data.status, data.uptime);
@@ -720,6 +747,12 @@
                     
                 } catch (error) {
                     console.error('Failed to fetch bot status:', error);
+                    if (this.isNetlify) {
+                        // In Netlify mode, show demo status
+                        this.status = 'demo';
+                        this.updateStatusDisplay('demo', 0);
+                        this.updateButtons();
+                    }
                 }
             }
 
@@ -746,7 +779,8 @@
                         'running': 'Online & Active',
                         'starting': 'Starting...',
                         'stopping': 'Shutting Down...',
-                        'stopped': 'Offline'
+                        'stopped': 'Offline',
+                        'demo': 'Demo Mode'
                     };
                     heroStatus.textContent = statusMap[status] || status;
                 }
@@ -756,6 +790,15 @@
                 const startBtn = document.getElementById('startBtn');
                 const stopBtn = document.getElementById('stopBtn');
                 const restartBtn = document.getElementById('restartBtn');
+                
+                if (this.isNetlify) {
+                    // In Netlify mode, disable actual bot control
+                    startBtn.disabled = true;
+                    stopBtn.disabled = true;
+                    restartBtn.disabled = true;
+                    startBtn.innerHTML = '<i class="fas fa-info-circle"></i> Demo Mode';
+                    return;
+                }
                 
                 switch (this.status) {
                     case 'stopped':
