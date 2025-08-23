@@ -1,5 +1,6 @@
 import { CHANNEL_USERNAME } from '../config';
 
+
 // Сообщения бота
 export const messages = {
   // Приветственное сообщение для подписанных пользователей

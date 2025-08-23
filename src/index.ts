@@ -136,19 +136,36 @@ async function startBot() {
     monitoringService.startMonitoring(SUBSCRIPTION_CHECK_INTERVAL);
     
     // Обработка graceful shutdown
-    process.once('SIGINT', () => {
-      console.log('\n🛑 Получен сигнал SIGINT, останавливаю бота...');
+    process.once('SIGINT', async () => {
+      console.log('\n🛑 Получен сигнал SIGINT, сохраняю данные и останавливаю бота...');
+      await saveAllData();
       bot.stop('SIGINT');
     });
     
-    process.once('SIGTERM', () => {
-      console.log('\n🛑 Получен сигнал SIGTERM, останавливаю бота...');
+    process.once('SIGTERM', async () => {
+      console.log('\n🛑 Получен сигнал SIGTERM, сохраняю данные и останавливаю бота...');
+      await saveAllData();
       bot.stop('SIGTERM');
     });
     
   } catch (error) {
     console.error('❌ Ошибка при запуске бота:', error);
     process.exit(1);
+  }
+}
+
+// Функция для сохранения всех данных перед выключением
+async function saveAllData() {
+  try {
+    console.log('💾 Сохраняю все данные...');
+    
+    // Принудительно сохраняем данные во всех сервисах
+    userService.forceSave();
+    referralService.forceSave();
+    
+    console.log('✅ Все данные успешно сохранены');
+  } catch (error) {
+    console.error('❌ Ошибка при сохранении данных:', error);
   }
 }
 

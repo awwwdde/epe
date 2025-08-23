@@ -1,5 +1,6 @@
 import { Context } from 'telegraf';
 import { messages } from '../messages';
+import { keyboards } from '../keyboards';
 import { UserService } from '../services/UserService';
 import { SubscriptionService } from '../services/SubscriptionService';
 
@@ -14,7 +15,9 @@ export class CheckHandler {
     const userId = ctx.from?.id;
     
     if (!userId) {
-      await ctx.reply(messages.userNotFound);
+      await ctx.reply(messages.userNotFound, {
+        reply_markup: keyboards.help
+      });
       return;
     }
 
@@ -24,9 +27,13 @@ export class CheckHandler {
     this.userService.updateSubscriptionStatus(userId, isSubscribed);
 
     if (isSubscribed) {
-      await ctx.reply(messages.subscribed);
+      await ctx.reply(messages.subscribed, {
+        reply_markup: keyboards.checkSubscription
+      });
     } else {
-      await ctx.reply(messages.notSubscribed);
+      await ctx.reply(messages.notSubscribed, {
+        reply_markup: keyboards.unsubscribe
+      });
     }
   }
 }

@@ -1,6 +1,8 @@
 import { Context } from 'telegraf';
 import { ReferralService } from '../services/ReferralService';
 import { UserService } from '../services/UserService';
+import { keyboards } from '../keyboards';
+import { referralShareMessages } from '../messages/referralShareMessages';
 
 export class ReferralHandler {
   constructor(
@@ -13,7 +15,9 @@ export class ReferralHandler {
     try {
       const userId = ctx.from?.id;
       if (!userId) {
-        await ctx.reply('❌ Не удалось определить пользователя');
+        await ctx.reply('❌ Не удалось определить пользователя', {
+          reply_markup: keyboards.help
+        });
         return;
       }
 
@@ -40,18 +44,12 @@ export class ReferralHandler {
           inline_keyboard: [
             [
               {
-                text: '🔗 Открыть ссылку',
-                url: referralLink
-              },
-              {
                 text: '📋 Копировать ссылку',
                 callback_data: `copy_link_${existingCode}`
-              }
-            ],
-            [
+              },
               {
                 text: '📤 Поделиться ссылкой',
-                switch_inline_query: `Присоединяйся к боту по моей реферальной ссылке: ${referralLink}`
+                switch_inline_query: referralShareMessages.getShareMessage(referralLink, username, firstName)
               }
             ],
             [
@@ -74,7 +72,9 @@ export class ReferralHandler {
       const referralCode = this.referralService.createReferralLink(userId, username, firstName);
       
       if (!referralCode) {
-        await ctx.reply('❌ Не удалось создать реферальную ссылку');
+        await ctx.reply('❌ Не удалось создать реферальную ссылку', {
+          reply_markup: keyboards.help
+        });
         return;
       }
 
@@ -95,18 +95,12 @@ export class ReferralHandler {
         inline_keyboard: [
           [
             {
-              text: '🔗 Открыть ссылку',
-              url: referralLink
-            },
-            {
               text: '📋 Копировать ссылку',
               callback_data: `copy_link_${referralCode}`
-            }
-          ],
-          [
+            },
             {
               text: '📤 Поделиться ссылкой',
-              switch_inline_query: `Присоединяйся к боту по моей реферальной ссылке: ${referralLink}`
+              switch_inline_query: referralShareMessages.getShareMessage(referralLink, username, firstName)
             }
           ],
           [
@@ -125,7 +119,9 @@ export class ReferralHandler {
 
     } catch (error) {
       console.error('Ошибка в ReferralHandler:', error);
-      await ctx.reply('❌ Произошла ошибка при создании реферальной ссылки');
+      await ctx.reply('❌ Произошла ошибка при создании реферальной ссылки', {
+        reply_markup: keyboards.help
+      });
     }
   }
 
@@ -135,7 +131,9 @@ export class ReferralHandler {
       const leaderboard = this.referralService.getLeaderboard(10);
       
       if (leaderboard.length === 0) {
-        await ctx.reply('📊 Пока нет данных для лидерборда рефералов');
+        await ctx.reply('📊 Пока нет данных для лидерборда рефералов', {
+          reply_markup: keyboards.getMainMenu(ctx.from?.id || 0)
+        });
         return;
       }
 
@@ -152,11 +150,15 @@ export class ReferralHandler {
         `👥 Всего приглашено: ${stats.totalReferrals}\n` +
         `🎯 Активных рефереров: ${stats.activeReferrers}`;
 
-      await ctx.reply(message);
+      await ctx.reply(message, {
+        reply_markup: keyboards.getMainMenu(ctx.from?.id || 0)
+      });
 
     } catch (error) {
       console.error('Ошибка в ReferralHandler.leaderboard:', error);
-      await ctx.reply('❌ Произошла ошибка при получении лидерборда');
+      await ctx.reply('❌ Произошла ошибка при получении лидерборда', {
+        reply_markup: keyboards.help
+      });
     }
   }
 
@@ -165,7 +167,9 @@ export class ReferralHandler {
     try {
       const userId = ctx.from?.id;
       if (!userId) {
-        await ctx.reply('❌ Не удалось определить пользователя');
+        await ctx.reply('❌ Не удалось определить пользователя', {
+          reply_markup: keyboards.help
+        });
         return;
       }
 
@@ -174,7 +178,9 @@ export class ReferralHandler {
       const stats = this.referralService.getReferralStats();
 
       if (!referralCode) {
-        await ctx.reply('❌ У вас нет реферальной ссылки. Используйте /referral для создания.');
+        await ctx.reply('❌ У вас нет реферальной ссылки. Используйте /referral для создания.', {
+          reply_markup: keyboards.help
+        });
         return;
       }
 
@@ -190,11 +196,15 @@ export class ReferralHandler {
         `👥 Всего приглашено: ${stats.totalReferrals}\n` +
         `🎯 Активных рефереров: ${stats.activeReferrers}`;
 
-      await ctx.reply(message);
+      await ctx.reply(message, {
+        reply_markup: keyboards.help
+      });
 
     } catch (error) {
       console.error('Ошибка в ReferralHandler.myStats:', error);
-      await ctx.reply('❌ Произошла ошибка при получении статистики');
+      await ctx.reply('❌ Произошла ошибка при получении статистики', {
+        reply_markup: keyboards.help
+      });
     }
   }
 }

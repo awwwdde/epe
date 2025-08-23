@@ -1,10 +1,66 @@
 import { ReferralData, UserData } from '../types';
+import { DataStorageService } from './DataStorageService';
 
 // Сервис для управления реферальной системой
 export class ReferralService {
   private referralStore = new Map<string, ReferralData>();
   private userReferrals = new Map<number, string>(); // userId -> referralCode
   private referredUsers = new Set<number>(); // Пользователи, которые уже были приглашены
+  private dataStorage: DataStorageService;
+
+  constructor() {
+    this.dataStorage = new DataStorageService();
+    this.loadDataFromStorage();
+  }
+
+  // Загрузка данных из хранилища
+  private loadDataFromStorage(): void {
+    try {
+      const storedData = this.dataStorage.loadData();
+      
+      // Восстанавливаем данные из файла
+      this.referralStore.clear();
+      this.userReferrals.clear();
+      this.referredUsers.clear();
+
+      // Загружаем реферальные данные
+      storedData.referrals.forEach(referral => {
+        this.referralStore.set(referral.code, referral);
+      });
+
+      // Загружаем связи пользователей с реферальными кодами
+      Object.entries(storedData.userReferrals).forEach(([userId, code]) => {
+        this.userReferrals.set(Number(userId), code);
+      });
+
+      // Загружаем список приглашенных пользователей
+      storedData.referredUsers.forEach(userId => {
+        this.referredUsers.add(userId);
+      });
+
+      // Убираем лишний лог
+      // console.log('✅ Реферальные данные загружены из хранилища');
+    } catch (error) {
+      console.error('❌ Ошибка при загрузке реферальных данных:', error);
+    }
+  }
+
+  // Сохранение данных в хранилище
+  private saveDataToStorage(): void {
+    try {
+      const dataToStore = {
+        referrals: Array.from(this.referralStore.values()),
+        userReferrals: Object.fromEntries(this.userReferrals),
+        referredUsers: Array.from(this.referredUsers),
+        users: {}, // Будет заполнено UserService
+        lastUpdated: Date.now()
+      };
+
+      this.dataStorage.saveData(dataToStore);
+    } catch (error) {
+      console.error('❌ Ошибка при сохранении реферальных данных:', error);
+    }
+  }
 
   // Генерировать уникальный реферальный код
   private generateReferralCode(): string {
@@ -43,6 +99,9 @@ export class ReferralService {
     this.referralStore.set(code, referralData);
     this.userReferrals.set(userId, code);
 
+    // Сохраняем в файл
+    this.saveDataToStorage();
+
     return code;
   }
 
@@ -79,6 +138,9 @@ export class ReferralService {
 
     // Отмечаем пользователя как приглашенного
     this.referredUsers.add(newUserId);
+
+    // Сохраняем в файл
+    this.saveDataToStorage();
 
     return true;
   }
@@ -117,5 +179,15 @@ export class ReferralService {
       activeReferrers,
       totalCodes: this.referralStore.size
     };
+  }
+
+  // Принудительное сохранение данных
+  forceSave(): void {
+    this.saveDataToStorage();
+  }
+
+  // Получить информацию о файле данных
+  getStorageInfo() {
+    return this.dataStorage.getFileInfo();
   }
 }

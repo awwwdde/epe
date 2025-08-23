@@ -4,6 +4,7 @@ import { keyboards } from '../keyboards';
 import { UserService } from '../services/UserService';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { ReferralService } from '../services/ReferralService';
+import { referralShareMessages } from '../messages/referralShareMessages';
 
 // Обработчики callback запросов
 export class CallbackHandlers {
@@ -93,18 +94,12 @@ export class CallbackHandlers {
         inline_keyboard: [
           [
             {
-              text: '🔗 Открыть ссылку',
-              url: referralLink
-            },
-            {
               text: '📋 Копировать ссылку',
               callback_data: `copy_link_${existingCode}`
-            }
-          ],
-          [
+            },
             {
               text: '📤 Поделиться ссылкой',
-              switch_inline_query: `Присоединяйся к боту по моей реферальной ссылке: ${referralLink}`
+              switch_inline_query: referralShareMessages.getShareMessage(referralLink, ctx.from?.username, ctx.from?.first_name || 'Пользователь')
             }
           ],
           [
@@ -150,18 +145,12 @@ export class CallbackHandlers {
       inline_keyboard: [
         [
           {
-            text: '🔗 Открыть ссылку',
-            url: referralLink
-          },
-          {
             text: '📋 Копировать ссылку',
             callback_data: `copy_link_${referralCode}`
-          }
-        ],
-        [
+          },
           {
             text: '📤 Поделиться ссылкой',
-            switch_inline_query: `Присоединяйся к боту по моей реферальной ссылке: ${referralLink}`
+            switch_inline_query: referralShareMessages.getShareMessage(referralLink, username, firstName)
           }
         ],
         [
@@ -181,7 +170,7 @@ export class CallbackHandlers {
 
   // Копировать ссылку
   async copyLink(ctx: Context): Promise<void> {
-    const callbackData = ctx.callbackQuery?.data;
+    const callbackData = (ctx.callbackQuery as any)?.data;
     if (!callbackData) {
       await ctx.answerCbQuery('❌ Ошибка при копировании ссылки');
       return;
@@ -191,9 +180,31 @@ export class CallbackHandlers {
     const botUsername = ctx.botInfo?.username;
     const referralLink = `https://t.me/${botUsername}?start=${code}`;
 
-    // Отправляем ссылку как отдельное сообщение для удобного копирования
+    // Отправляем ссылку как отдельное сообщение для удобного копирования с кнопками
+    const keyboard = {
+      inline_keyboard: [
+        [
+          {
+            text: '📋 Копировать ссылку',
+            callback_data: `copy_link_${code}`
+          },
+          {
+            text: '📤 Поделиться ссылкой',
+            switch_inline_query: referralShareMessages.getShareMessage(referralLink, ctx.from?.username, ctx.from?.first_name || 'Пользователь')
+          }
+        ],
+        [
+          {
+            text: '🔙 Назад в меню',
+            callback_data: 'referral_menu'
+          }
+        ]
+      ]
+    };
+
     await ctx.reply(`📋 Ваша реферальная ссылка:\n\n<code>${referralLink}</code>\n\n💡 Скопируйте эту ссылку и поделитесь с друзьями!`, {
-      parse_mode: 'HTML'
+      parse_mode: 'HTML',
+      reply_markup: keyboard
     });
 
     // Отвечаем на callback
