@@ -2,7 +2,67 @@ import { CHANNEL_USERNAME } from '../config';
 
 // Клавиатуры для бота
 export const keyboards = {
-  // Клавиатура для подписанных пользователей
+  // Главное меню для подписанных пользователей
+  getMainMenu: (userId: number) => ({
+    inline_keyboard: [
+      [
+        {
+          text: '🔗 Реферальная система',
+          callback_data: 'referral_menu'
+        }
+      ],
+      [
+        {
+          text: '📊 Статистика',
+          callback_data: 'show_stats'
+        },
+        {
+          text: '🏆 Лидерборд',
+          callback_data: 'show_leaderboard'
+        }
+      ],
+      [
+        {
+          text: '🔄 Проверить подписку',
+          callback_data: 'check_subscription'
+        },
+        {
+          text: '📖 Справка',
+          callback_data: 'show_help'
+        }
+      ]
+    ]
+  }),
+
+  // Меню реферальной системы
+  referralMenu: {
+    inline_keyboard: [
+      [
+        {
+          text: '🔗 Создать реферальную ссылку',
+          callback_data: 'create_referral'
+        }
+      ],
+      [
+        {
+          text: '📊 Моя статистика',
+          callback_data: 'my_referral_stats'
+        },
+        {
+          text: '🏆 Топ рефералов',
+          callback_data: 'show_leaderboard'
+        }
+      ],
+      [
+        {
+          text: '🔙 Назад в главное меню',
+          callback_data: 'back_to_main'
+        }
+      ]
+    ]
+  },
+
+  // Клавиатура для подписанных пользователей (устаревшая, заменена на getMainMenu)
   subscribed: {
     inline_keyboard: [
       [
@@ -50,13 +110,33 @@ export const keyboards = {
     ]
   },
 
-  // Клавиатура для проверки подписки
+  // Клавиатура для проверки подписки с полным меню
   checkSubscription: {
     inline_keyboard: [
       [
         {
+          text: '🔗 Реферальная система',
+          callback_data: 'referral_menu'
+        }
+      ],
+      [
+        {
+          text: '📊 Статистика',
+          callback_data: 'show_stats'
+        },
+        {
+          text: '🏆 Лидерборд',
+          callback_data: 'show_leaderboard'
+        }
+      ],
+      [
+        {
           text: '🔄 Проверить снова',
           callback_data: 'check_subscription'
+        },
+        {
+          text: '📖 Справка',
+          callback_data: 'show_help'
         }
       ]
     ]
@@ -67,7 +147,23 @@ export const keyboards = {
     inline_keyboard: [
       [
         {
-          text: '🔙 Назад',
+          text: '🔗 Реферальная система',
+          callback_data: 'referral_menu'
+        }
+      ],
+      [
+        {
+          text: '📊 Статистика',
+          callback_data: 'show_stats'
+        },
+        {
+          text: '🏆 Лидерборд',
+          callback_data: 'show_leaderboard'
+        }
+      ],
+      [
+        {
+          text: '🔙 Назад в главное меню',
           callback_data: 'back_to_main'
         }
       ]

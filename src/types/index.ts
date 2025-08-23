@@ -11,6 +11,19 @@ export interface UserData {
   id: number;
   isSubscribed: boolean;
   lastCheck: number;
+  referralCode?: string;
+  referredBy?: string;
+  referralCount: number;
+  joinDate: number;
+}
+
+export interface ReferralData {
+  code: string;
+  userId: number;
+  username?: string;
+  firstName: string;
+  referralCount: number;
+  createdAt: number;
 }
 
 export interface BotConfig {

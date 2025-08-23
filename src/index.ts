@@ -9,6 +9,7 @@ import { UserService } from './services/UserService';
 import { SubscriptionService } from './services/SubscriptionService';
 import { MessageService } from './services/MessageService';
 import { MonitoringService } from './services/MonitoringService';
+import { ReferralService } from './services/ReferralService';
 
 // Импорты обработчиков
 import { StartHandler } from './handlers/startHandler';
@@ -16,6 +17,7 @@ import { HelpHandler } from './handlers/helpHandler';
 import { SubscribeHandler } from './handlers/subscribeHandler';
 import { CheckHandler } from './handlers/checkHandler';
 import { CallbackHandlers } from './handlers/callbackHandlers';
+import { ReferralHandler } from './handlers/referralHandler';
 
 // Импорты сообщений
 import { messages } from './messages';
@@ -27,14 +29,16 @@ const bot = new Telegraf(config.botToken);
 const userService = new UserService();
 const subscriptionService = new SubscriptionService();
 const messageService = new MessageService();
+const referralService = new ReferralService();
 const monitoringService = new MonitoringService(bot, userService, subscriptionService, messageService);
 
 // Инициализируем обработчики
-const startHandler = new StartHandler(userService, subscriptionService);
+const startHandler = new StartHandler(userService, subscriptionService, referralService);
 const helpHandler = new HelpHandler();
 const subscribeHandler = new SubscribeHandler();
 const checkHandler = new CheckHandler(userService, subscriptionService);
-const callbackHandlers = new CallbackHandlers(userService, subscriptionService);
+const callbackHandlers = new CallbackHandlers(userService, subscriptionService, referralService);
+const referralHandler = new ReferralHandler(referralService, userService);
 
 // Регистрируем обработчики команд
 bot.start(async (ctx) => {
@@ -53,6 +57,19 @@ bot.command('check', async (ctx) => {
   await checkHandler.handle(ctx);
 });
 
+// Реферальные команды
+bot.command('referral', async (ctx) => {
+  await referralHandler.handle(ctx);
+});
+
+bot.command('leaderboard', async (ctx) => {
+  await referralHandler.handleLeaderboard(ctx);
+});
+
+bot.command('mystats', async (ctx) => {
+  await referralHandler.handleMyStats(ctx);
+});
+
 // Регистрируем обработчики callback запросов
 bot.action('show_help', async (ctx) => {
   await callbackHandlers.showHelp(ctx);
@@ -64,6 +81,27 @@ bot.action('back_to_main', async (ctx) => {
 
 bot.action('check_subscription', async (ctx) => {
   await callbackHandlers.checkSubscription(ctx);
+});
+
+// Новые callback обработчики для реферальной системы
+bot.action('referral_menu', async (ctx) => {
+  await callbackHandlers.showReferralMenu(ctx);
+});
+
+bot.action('create_referral', async (ctx) => {
+  await callbackHandlers.createReferral(ctx);
+});
+
+bot.action('my_referral_stats', async (ctx) => {
+  await callbackHandlers.showMyReferralStats(ctx);
+});
+
+bot.action('show_leaderboard', async (ctx) => {
+  await callbackHandlers.showLeaderboard(ctx);
+});
+
+bot.action('show_stats', async (ctx) => {
+  await callbackHandlers.showStats(ctx);
 });
 
 // Обработчик неизвестных команд

@@ -17,7 +17,9 @@ export class UserService {
       userData = {
         id: userId,
         isSubscribed: false,
-        lastCheck: Date.now()
+        lastCheck: Date.now(),
+        referralCount: 0,
+        joinDate: Date.now()
       };
       this.userStore.set(userId, userData);
     }
@@ -30,6 +32,18 @@ export class UserService {
     const userData = this.getOrCreateUser(userId);
     userData.isSubscribed = isSubscribed;
     userData.lastCheck = Date.now();
+  }
+
+  // Установить реферальную связь
+  setReferralLink(userId: number, referralCode: string): void {
+    const userData = this.getOrCreateUser(userId);
+    userData.referralCode = referralCode;
+  }
+
+  // Установить, кто пригласил пользователя
+  setReferredBy(userId: number, referredBy: string): void {
+    const userData = this.getOrCreateUser(userId);
+    userData.referredBy = referredBy;
   }
 
   // Удалить пользователя
